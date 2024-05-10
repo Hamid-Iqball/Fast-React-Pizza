@@ -22,21 +22,22 @@ async function fetchAddress() {
 }
 */
 
-import { createSlice } from "@reduxjs/toolkit"
-
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  userName:''
-}
+  username: "",
+};
 
 const userSlice = createSlice({
-  name:'user',
+  name: "user",
   initialState,
-  reducers:{
-  updateName(state , actions){
-    state.username = action.payload
-  }
-  }
-})
+  reducers: {
+    updateName(state, action) {
+      state.username = action.payload;
+    },
+  },
+});
 
-export const {}
+export const { updateName } = userSlice.actions;
+
+export default userSlice.reducer;
