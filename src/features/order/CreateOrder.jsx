@@ -3,10 +3,11 @@ import { Form, redirect, useActionData, useNavigation } from "react-router-dom";
 import { createOrder } from "../../services/apiRestaurant";
 import Button from "../../ui/Button";
 import EmptyCart from "../cart/EmptyCart";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { clearCart, getCart, getTotalPrice } from "../cart/cartSlice";
 import store from "../../Store";
 import { formatCurrency } from "../../utils/helpers";
+import { fetchAddress } from "../user/userSlice";
 
 // https://uibakery.io/regex-library/phone-number
 const isValidPhone = (str) =>
@@ -15,11 +16,20 @@ const isValidPhone = (str) =>
   );
 
 function CreateOrder() {
-  const [withPriority, setWithPriority] = useState("");
-  const username = useSelector((state) => state.user.username);
-  // const [withPriority, setWithPriority] = useState(false);
+  // const [withPriority, setWithPriority] = useState("");
+  const {
+    username,
+    status: addressStatus,
+    position,
+    address,
+    error: errorAddress,
+  } = useSelector((state) => state.user);
+  const isLoadingAddress = addressStatus === "loading";
+  const [withPriority, setWithPriority] = useState(false);
+
   const navigation = useNavigation();
   const isSubmitting = navigation.state === "submitting";
+  const dispatch = useDispatch();
   let formErrors = useActionData();
 
   const cart = useSelector(getCart);
@@ -53,14 +63,32 @@ function CreateOrder() {
         </div>
         <div className="mb-5 flex gap-2 flex-col sm:flex-row sm:items-center ">
           <label className="sm:basis-40">Address</label>
-          <div className="flex grow">
+          <div className="flex grow relative">
             <input
               type="text"
               name="address"
+              disabled={isLoadingAddress}
+              defaultValue={address}
               required
               className=" input w-full"
             />
           </div>
+          {addressStatus === "error" && <p> {errorAddress} </p>}
+
+          {!position.latitude && !position.longitude && (
+            <span className="absolute right-[5px] z-50  ">
+              <Button
+                type="small"
+                disabled={isLoadingAddress}
+                onClick={(e) => {
+                  e.preventDefault();
+                  dispatch(fetchAddress());
+                }}
+              >
+                Get Position{" "}
+              </Button>
+            </span>
+          )}
         </div>
 
         <div className="mb-6 flex gap-5 items-end ">
